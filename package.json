@@ -1,12 +1,19 @@
 {
-  "name": "nginx-proxy-manager-mcp",
-  "version": "1.0.0",
+  "name": "@kylerm42/nginx-proxy-manager-mcp",
+  "version": "1.1.0",
   "description": "MCP Server for Nginx Proxy Manager",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "nginx-proxy-manager-mcp": "dist/index.js",
     "npm-cli": "dist/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kylerm42/npm-mcp-server.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build": "tsc",

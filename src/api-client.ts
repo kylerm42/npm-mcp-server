@@ -264,10 +264,21 @@ export class NpmApiClient {
   private async request<T>(
     method: string,
     path: string,
-    body?: unknown
+    body?: unknown,
+    queryParams?: Record<string, string | number>
   ): Promise<T> {
     const token = await this.ensureToken();
-    const response = await fetch(`${this.baseUrl}/api${path}`, {
+    
+    let url = `${this.baseUrl}/api${path}`;
+    if (queryParams) {
+      const params = new URLSearchParams();
+      Object.entries(queryParams).forEach(([key, value]) => {
+        params.append(key, String(value));
+      });
+      url += `?${params.toString()}`;
+    }
+    
+    const response = await fetch(url, {
       method,
       headers: {
         "Content-Type": "application/json",
@@ -289,8 +300,28 @@ export class NpmApiClient {
   }
 
   // Proxy Hosts
-  async listProxyHosts(): Promise<ProxyHost[]> {
-    return this.request<ProxyHost[]>("GET", "/nginx/proxy-hosts");
+  async listProxyHosts(options?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<ProxyHost[]> {
+    // Fetch all hosts (API doesn't support server-side pagination)
+    const allHosts = await this.request<ProxyHost[]>(
+      "GET",
+      "/nginx/proxy-hosts"
+    );
+    
+    // Apply client-side pagination
+    if (options?.limit !== undefined || options?.offset !== undefined) {
+      const offset = options.offset || 0;
+      const limit = options.limit;
+      
+      if (limit !== undefined) {
+        return allHosts.slice(offset, offset + limit);
+      }
+      return allHosts.slice(offset);
+    }
+    
+    return allHosts;
   }
 
   async getProxyHost(id: number): Promise<ProxyHost> {
@@ -326,8 +357,26 @@ export class NpmApiClient {
   }
 
   // Certificates
-  async listCertificates(): Promise<Certificate[]> {
-    return this.request<Certificate[]>("GET", "/nginx/certificates");
+  async listCertificates(options?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<Certificate[]> {
+    const allCerts = await this.request<Certificate[]>(
+      "GET",
+      "/nginx/certificates"
+    );
+    
+    if (options?.limit !== undefined || options?.offset !== undefined) {
+      const offset = options.offset || 0;
+      const limit = options.limit;
+      
+      if (limit !== undefined) {
+        return allCerts.slice(offset, offset + limit);
+      }
+      return allCerts.slice(offset);
+    }
+    
+    return allCerts;
   }
 
   async getCertificate(id: number): Promise<Certificate> {
@@ -348,8 +397,26 @@ export class NpmApiClient {
   }
 
   // Streams
-  async listStreams(): Promise<Stream[]> {
-    return this.request<Stream[]>("GET", "/nginx/streams");
+  async listStreams(options?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<Stream[]> {
+    const allStreams = await this.request<Stream[]>(
+      "GET",
+      "/nginx/streams"
+    );
+    
+    if (options?.limit !== undefined || options?.offset !== undefined) {
+      const offset = options.offset || 0;
+      const limit = options.limit;
+      
+      if (limit !== undefined) {
+        return allStreams.slice(offset, offset + limit);
+      }
+      return allStreams.slice(offset);
+    }
+    
+    return allStreams;
   }
 
   async getStream(id: number): Promise<Stream> {
@@ -385,8 +452,26 @@ export class NpmApiClient {
   }
 
   // Redirection Hosts
-  async listRedirectionHosts(): Promise<RedirectionHost[]> {
-    return this.request<RedirectionHost[]>("GET", "/nginx/redirection-hosts");
+  async listRedirectionHosts(options?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<RedirectionHost[]> {
+    const allHosts = await this.request<RedirectionHost[]>(
+      "GET",
+      "/nginx/redirection-hosts"
+    );
+    
+    if (options?.limit !== undefined || options?.offset !== undefined) {
+      const offset = options.offset || 0;
+      const limit = options.limit;
+      
+      if (limit !== undefined) {
+        return allHosts.slice(offset, offset + limit);
+      }
+      return allHosts.slice(offset);
+    }
+    
+    return allHosts;
   }
 
   async getRedirectionHost(id: number): Promise<RedirectionHost> {
@@ -441,8 +526,26 @@ export class NpmApiClient {
   }
 
   // Dead Hosts (404 Hosts)
-  async listDeadHosts(): Promise<DeadHost[]> {
-    return this.request<DeadHost[]>("GET", "/nginx/dead-hosts");
+  async listDeadHosts(options?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<DeadHost[]> {
+    const allHosts = await this.request<DeadHost[]>(
+      "GET",
+      "/nginx/dead-hosts"
+    );
+    
+    if (options?.limit !== undefined || options?.offset !== undefined) {
+      const offset = options.offset || 0;
+      const limit = options.limit;
+      
+      if (limit !== undefined) {
+        return allHosts.slice(offset, offset + limit);
+      }
+      return allHosts.slice(offset);
+    }
+    
+    return allHosts;
   }
 
   async getDeadHost(id: number): Promise<DeadHost> {
@@ -478,8 +581,26 @@ export class NpmApiClient {
   }
 
   // Access Lists
-  async listAccessLists(): Promise<AccessList[]> {
-    return this.request<AccessList[]>("GET", "/nginx/access-lists");
+  async listAccessLists(options?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<AccessList[]> {
+    const allLists = await this.request<AccessList[]>(
+      "GET",
+      "/nginx/access-lists"
+    );
+    
+    if (options?.limit !== undefined || options?.offset !== undefined) {
+      const offset = options.offset || 0;
+      const limit = options.limit;
+      
+      if (limit !== undefined) {
+        return allLists.slice(offset, offset + limit);
+      }
+      return allLists.slice(offset);
+    }
+    
+    return allLists;
   }
 
   async getAccessList(id: number): Promise<AccessList> {
@@ -505,8 +626,26 @@ export class NpmApiClient {
   }
 
   // Users
-  async listUsers(): Promise<User[]> {
-    return this.request<User[]>("GET", "/users");
+  async listUsers(options?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<User[]> {
+    const allUsers = await this.request<User[]>(
+      "GET",
+      "/users"
+    );
+    
+    if (options?.limit !== undefined || options?.offset !== undefined) {
+      const offset = options.offset || 0;
+      const limit = options.limit;
+      
+      if (limit !== undefined) {
+        return allUsers.slice(offset, offset + limit);
+      }
+      return allUsers.slice(offset);
+    }
+    
+    return allUsers;
   }
 
   async getUser(id: number): Promise<User> {

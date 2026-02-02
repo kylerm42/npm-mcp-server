@@ -34,20 +34,62 @@ const server = new McpServer({
   version: "1.0.0",
 });
 
+// Helper function to format paginated responses
+function formatPaginatedResponse<T>(
+  items: T[],
+  limit: number,
+  offset: number,
+  itemsKey: string
+): string {
+  const hasMore = items.length === limit;
+  const result = {
+    [itemsKey]: items,
+    pagination: {
+      limit,
+      offset,
+      returned: items.length,
+      hasMore,
+      nextOffset: hasMore ? offset + limit : null,
+    },
+  };
+  
+  let message = JSON.stringify(result, null, 2);
+  
+  if (hasMore) {
+    message += `\n\n⚠️  MORE DATA AVAILABLE: ${items.length} results returned. There may be more ${itemsKey}. Use offset=${offset + limit} to fetch the next page.`;
+  } else if (items.length === 0 && offset > 0) {
+    message += `\n\nℹ️  No more results. You've reached the end of the data.`;
+  }
+  
+  return message;
+}
+
 // ============ PROXY HOSTS ============
 
 server.tool(
   "list_proxy_hosts",
   "List all proxy hosts configured in Nginx Proxy Manager",
-  {},
-  async () => {
+  {
+    limit: z
+      .number()
+      .min(1)
+      .max(100)
+      .default(50)
+      .describe("Maximum number of results to return (default: 50, max: 100)"),
+    offset: z
+      .number()
+      .min(0)
+      .default(0)
+      .describe("Number of results to skip for pagination (default: 0)"),
+  },
+  async ({ limit, offset }) => {
     try {
-      const hosts = await client.listProxyHosts();
+      const hosts = await client.listProxyHosts({ limit, offset });
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(hosts, null, 2),
+            text: formatPaginatedResponse(hosts, limit, offset, "hosts"),
           },
         ],
       };
@@ -319,15 +361,27 @@ server.tool(
 server.tool(
   "list_streams",
   "List all TCP/UDP stream configurations",
-  {},
-  async () => {
+  {
+    limit: z
+      .number()
+      .min(1)
+      .max(100)
+      .default(50)
+      .describe("Maximum number of results to return (default: 50, max: 100)"),
+    offset: z
+      .number()
+      .min(0)
+      .default(0)
+      .describe("Number of results to skip for pagination (default: 0)"),
+  },
+  async ({ limit, offset }) => {
     try {
-      const streams = await client.listStreams();
+      const streams = await client.listStreams({ limit, offset });
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(streams, null, 2),
+            text: formatPaginatedResponse(streams, limit, offset, "streams"),
           },
         ],
       };
@@ -478,15 +532,27 @@ server.tool(
 server.tool(
   "list_redirection_hosts",
   "List all redirection hosts",
-  {},
-  async () => {
+  {
+    limit: z
+      .number()
+      .min(1)
+      .max(100)
+      .default(50)
+      .describe("Maximum number of results to return (default: 50, max: 100)"),
+    offset: z
+      .number()
+      .min(0)
+      .default(0)
+      .describe("Number of results to skip for pagination (default: 0)"),
+  },
+  async ({ limit, offset }) => {
     try {
-      const hosts = await client.listRedirectionHosts();
+      const hosts = await client.listRedirectionHosts({ limit, offset });
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(hosts, null, 2),
+            text: formatPaginatedResponse(hosts, limit, offset, "redirection_hosts"),
           },
         ],
       };
@@ -586,15 +652,27 @@ server.tool(
 server.tool(
   "list_certificates",
   "List all SSL certificates",
-  {},
-  async () => {
+  {
+    limit: z
+      .number()
+      .min(1)
+      .max(100)
+      .default(50)
+      .describe("Maximum number of results to return (default: 50, max: 100)"),
+    offset: z
+      .number()
+      .min(0)
+      .default(0)
+      .describe("Number of results to skip for pagination (default: 0)"),
+  },
+  async ({ limit, offset }) => {
     try {
-      const certs = await client.listCertificates();
+      const certs = await client.listCertificates({ limit, offset });
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(certs, null, 2),
+            text: formatPaginatedResponse(certs, limit, offset, "certificates"),
           },
         ],
       };
@@ -710,15 +788,27 @@ server.tool(
 server.tool(
   "list_access_lists",
   "List all access lists",
-  {},
-  async () => {
+  {
+    limit: z
+      .number()
+      .min(1)
+      .max(100)
+      .default(50)
+      .describe("Maximum number of results to return (default: 50, max: 100)"),
+    offset: z
+      .number()
+      .min(0)
+      .default(0)
+      .describe("Number of results to skip for pagination (default: 0)"),
+  },
+  async ({ limit, offset }) => {
     try {
-      const lists = await client.listAccessLists();
+      const lists = await client.listAccessLists({ limit, offset });
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(lists, null, 2),
+            text: formatPaginatedResponse(lists, limit, offset, "access_lists"),
           },
         ],
       };
@@ -811,15 +901,27 @@ server.tool(
 server.tool(
   "list_dead_hosts",
   "List all 404 hosts (domains that show a 404 page)",
-  {},
-  async () => {
+  {
+    limit: z
+      .number()
+      .min(1)
+      .max(100)
+      .default(50)
+      .describe("Maximum number of results to return (default: 50, max: 100)"),
+    offset: z
+      .number()
+      .min(0)
+      .default(0)
+      .describe("Number of results to skip for pagination (default: 0)"),
+  },
+  async ({ limit, offset }) => {
     try {
-      const hosts = await client.listDeadHosts();
+      const hosts = await client.listDeadHosts({ limit, offset });
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(hosts, null, 2),
+            text: formatPaginatedResponse(hosts, limit, offset, "dead_hosts"),
           },
         ],
       };
@@ -906,15 +1008,27 @@ server.tool(
 server.tool(
   "list_users",
   "List all users in Nginx Proxy Manager",
-  {},
-  async () => {
+  {
+    limit: z
+      .number()
+      .min(1)
+      .max(100)
+      .default(50)
+      .describe("Maximum number of results to return (default: 50, max: 100)"),
+    offset: z
+      .number()
+      .min(0)
+      .default(0)
+      .describe("Number of results to skip for pagination (default: 0)"),
+  },
+  async ({ limit, offset }) => {
     try {
-      const users = await client.listUsers();
+      const users = await client.listUsers({ limit, offset });
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(users, null, 2),
+            text: formatPaginatedResponse(users, limit, offset, "users"),
           },
         ],
       };
